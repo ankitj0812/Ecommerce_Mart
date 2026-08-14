@@ -46,7 +46,7 @@ source_with_row_id AS (
 
 ,
 
-target_data AS (
+target_by_pk AS (
 
     SELECT
         CUSTOMER_ID,
@@ -58,45 +58,17 @@ target_data AS (
 
 ),
 
-classified AS (
+source_enriched AS (
 
     SELECT
         s.*,
-
-        t.CUSTOMER_ID AS TARGET_CUSTOMER_ID,
         t.ROW_ID AS TARGET_ROW_ID,
         t.CREATED_DATE AS TARGET_CREATED_DATE,
-        t.MODIFIED_DATE AS TARGET_MODIFIED_DATE,
-
-        CASE
-
-            /* PK exists and business data has not changed */
-            WHEN t.CUSTOMER_ID IS NOT NULL
-                 AND s.ROW_ID = t.ROW_ID
-            THEN 'UNCHANGED'
-
-            /* PK exists but business data has changed */
-            WHEN t.CUSTOMER_ID IS NOT NULL
-                 AND s.ROW_ID <> t.ROW_ID
-            THEN 'MODIFIED'
-
-            /* PK is new but the same business state exists */
-            WHEN t.CUSTOMER_ID IS NULL
-                 AND EXISTS (
-                     SELECT 1
-                     FROM target_data t2
-                     WHERE t2.ROW_ID = s.ROW_ID
-                 )
-            THEN 'NEW_PK_SAME_ROW_ID'
-
-            /* Completely new record */
-            ELSE 'NEW_RECORD'
-
-        END AS RECORD_STATUS
+        t.MODIFIED_DATE AS TARGET_MODIFIED_DATE
 
     FROM source_with_row_id s
 
-    LEFT JOIN target_data t
+    LEFT JOIN target_by_pk t
         ON s.CUSTOMER_ID = t.CUSTOMER_ID
 
 )
@@ -112,10 +84,12 @@ SELECT
 
     CASE
 
-        WHEN RECORD_STATUS = 'UNCHANGED'
+        WHEN TARGET_ROW_ID IS NOT NULL
+             AND ROW_ID = TARGET_ROW_ID
             THEN TARGET_CREATED_DATE
 
-        WHEN RECORD_STATUS = 'MODIFIED'
+        WHEN TARGET_ROW_ID IS NOT NULL
+             AND ROW_ID <> TARGET_ROW_ID
             THEN TARGET_CREATED_DATE
 
         ELSE CURRENT_TIMESTAMP()
@@ -124,14 +98,15 @@ SELECT
 
     CASE
 
-        WHEN RECORD_STATUS = 'UNCHANGED'
+        WHEN TARGET_ROW_ID IS NOT NULL
+             AND ROW_ID = TARGET_ROW_ID
             THEN TARGET_MODIFIED_DATE
 
         ELSE CURRENT_TIMESTAMP()
 
     END AS MODIFIED_DATE
 
-FROM classified
+FROM source_enriched
 
 {% else %}
 
