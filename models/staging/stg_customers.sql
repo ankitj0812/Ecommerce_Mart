@@ -1,0 +1,11 @@
+SELECT
+    CUSTOMER_ID,
+    CUSTOMER_NAME,
+    CITY,
+    STATUS,
+    EMAIL,
+
+    CURRENT_TIMESTAMP() AS STG_CREATED_DATE,
+    CURRENT_TIMESTAMP() AS STG_UPDATED_DATE
+
+FROM {{ source('raw', 'customers') }}
