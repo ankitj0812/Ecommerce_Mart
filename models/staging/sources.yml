@@ -17,3 +17,5 @@ sources:
           - name: customer_name
             data_tests:
               - not_null
+
+      - name: customer_incremental

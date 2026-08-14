@@ -8,4 +8,4 @@ SELECT
     CURRENT_TIMESTAMP() AS STG_CREATED_DATE,
     CURRENT_TIMESTAMP() AS STG_UPDATED_DATE
 
-FROM {{ source('raw', 'customers') }}
+FROM {{ source('raw', var('customer_source_table')) }}
