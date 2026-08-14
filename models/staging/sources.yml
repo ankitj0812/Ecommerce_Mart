@@ -7,3 +7,13 @@ sources:
 
     tables:
       - name: customers
+
+        columns:
+          - name: customer_id
+            data_tests:
+              - not_null
+              - unique
+
+          - name: customer_name
+            data_tests:
+              - not_null
