@@ -26,6 +26,14 @@ clean-targets:         # directories to be removed by `dbt clean`
 
 vars:
   customer_source_table: customers
+  audit_columns:
+    - STG_CREATED_DATE
+    - STG_UPDATED_DATE
+    - CREATED_DATE
+    - MODIFIED_DATE
+    - CREATED_BY
+    - MODIFIED_BY
+    - ROW_ID
 
 
 # Configuring models
